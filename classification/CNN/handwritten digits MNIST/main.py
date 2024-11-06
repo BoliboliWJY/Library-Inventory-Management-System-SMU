@@ -1,4 +1,5 @@
 #%%
+#注意，这个跑的特别慢，且优化效果不明显！未经过并行优化，加上代码估计有问题
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -28,8 +29,8 @@ labels_file = os.path.join(script_dir, r'archive\train-labels.idx1-ubyte')
 images = read_images(images_file)
 labels = read_labels(labels_file)
 
-images = images[0:10000]
-labels = labels[0:10000]
+# images = images[0:10000]
+# labels = labels[0:10000]
 
 # %%
 #打印原始数据
@@ -44,7 +45,7 @@ for i in range(show_row*show_col):
     plt.axis('off')
 # %%
 #定义各种层
-class FullyConnectedLayer:
+class FullyConnectedLayer:#全连接层
     def __init__(self, input_len, output_len):
         self.weights = np.random.randn(input_len, output_len) / input_len
         self.bias = np.zeros(output_len)
@@ -144,7 +145,7 @@ pool_output_width = calculate_output_size(conv_output_width, pool_size, pool_siz
 output_size_after_pooling = pool_output_height * pool_output_width * conv.num_filters
 fc = FullyConnectedLayer(input_len = output_size_after_pooling, output_len = 20)
 learn_rate = 0.005
-epochs = 10
+epochs = 50
 batch_size = 100
 losses = []
 
