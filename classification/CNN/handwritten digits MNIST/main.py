@@ -28,6 +28,9 @@ labels_file = os.path.join(script_dir, r'archive\train-labels.idx1-ubyte')
 images = read_images(images_file)
 labels = read_labels(labels_file)
 
+images = images[0:10000]
+labels = labels[0:10000]
+
 # %%
 #打印原始数据
 print(f'Images shape: {images.shape}')
@@ -141,11 +144,13 @@ pool_output_width = calculate_output_size(conv_output_width, pool_size, pool_siz
 output_size_after_pooling = pool_output_height * pool_output_width * conv.num_filters
 fc = FullyConnectedLayer(input_len = output_size_after_pooling, output_len = 20)
 learn_rate = 0.005
-epochs = 3
+epochs = 10
 batch_size = 100
+losses = []
 
 for epoch in range(epochs):
     print(f'--- Epoch {epoch+1} ---')
+    epoch_losses = []
     for i in range(0, len(images), batch_size):
         batch_images = images[i:i+batch_size]
         batch_labels = labels[i:i+batch_size]
@@ -156,7 +161,8 @@ for epoch in range(epochs):
         probs = softmax(fc_out)
         #loss
         loss = cross_entropy_loss(probs, batch_labels)
-        # print(f'Batch {i//batch_size+1}, Loss: {loss}')
+        epoch_losses.append(loss)
+        print(f'Batch {i//batch_size+1}, Loss: {loss}')
         #反向
         d_L_d_out = probs
         d_L_d_out[np.arange(batch_size), batch_labels] -= 1
@@ -165,3 +171,15 @@ for epoch in range(epochs):
         d_L_d_fc = fc.backprop(d_L_d_out, learn_rate)
         d_L_d_pool = d_L_d_fc.reshape(batch_size, pool_out.shape[1], pool_out.shape[2], conv.num_filters)
         conv.backprop(d_L_d_pool, learn_rate)
+        
+    average_loss = np.mean(epoch_losses)
+    losses.append(average_loss)
+    print(f'Epoch {epoch+1}, Average Loss: {average_loss}')
+        
+plt.figure(figsize=(10, 5))
+plt.plot(range(1, epochs + 1), losses, marker='o')
+plt.title('Loss over Epochs')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.grid(True)
+plt.show()     
