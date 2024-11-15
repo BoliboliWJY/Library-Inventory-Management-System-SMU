@@ -13,7 +13,9 @@ print(os.getcwd())
 model_weights_path = r'.\model\resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
 #%%
-num_classes = 2
+train_path = r'.\input\train'
+num_classes = sum(os.path.isdir(os.path.join(train_path, name)) for name in os.listdir(train_path))
+print(num_classes)
 
 model = Sequential()
 model.add(ResNet50(include_top=False, pooling = 'avg', weights = model_weights_path))
@@ -25,7 +27,7 @@ model.compile(optimizer='sgd', loss='categorical_crossentropy', metrics=['accura
 # %%
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-image_size = 224
+image_size = 500
 current_path = os.getcwd()
 print("当前工作目录:", current_path)
 data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
@@ -33,21 +35,23 @@ data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
 train_generator = data_generator.flow_from_directory(
         r'.\input\train',
         target_size=(image_size, image_size),
-        batch_size=12,
+        batch_size=20,
         class_mode='categorical')
 
 validation_generator = data_generator.flow_from_directory(
         r'.\input\val',
         target_size=(image_size, image_size),
-        batch_size=20,
+        batch_size=10,
         class_mode='categorical')
+
+print(train_generator.class_indices)
 # %%
 import matplotlib.pyplot as plt
 
 # 获取训练历史
 history = model.fit(
         train_generator,
-        steps_per_epoch=2,
+        steps_per_epoch=6,
         validation_data=validation_generator,
         validation_steps=1,
         epochs = 3)
@@ -59,6 +63,7 @@ plt.title('Model Loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(loc='upper right')
+plt.savefig('train.jpg')
 plt.show()
 
 # 绘制训练 & 验证的准确率
@@ -68,8 +73,11 @@ plt.title('Model Accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
 plt.legend(loc='lower right')
+plt.savefig('valid.jpg')
 plt.show()
 
 # %%
 model.save('transfer_model.keras')
 # %%
+
+ # %%

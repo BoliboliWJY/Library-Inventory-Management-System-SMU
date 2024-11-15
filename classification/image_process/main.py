@@ -114,9 +114,9 @@ def process_image(path, size, rotate, num):
         
 current_dir = os.getcwd()
 jpg_files = glob.glob(os.path.join(current_dir, "*.jpg"))
-rotate = 10
-size = 255
-num = 1000
+rotate = 15
+size = 500
+num = 100
 for path in tqdm.tqdm (jpg_files, desc = 'Processing...',
                   ascii = False, ncols = 75):
     process_image(path,size,rotate,num)
